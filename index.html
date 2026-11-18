@@ -210,6 +210,7 @@
     display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     gap: clamp(28px, 5vw, 64px); margin-top: clamp(32px, 5vw, 52px); align-items: start;
   }
+  .cases { display: grid; gap: 28px; }
   .case { display: block; text-decoration: none; }
   .screen {
     position: relative; overflow: hidden; aspect-ratio: 16 / 10;
@@ -274,6 +275,25 @@
     padding-block: 22px; border-top: 1px solid rgba(255,255,255,.14);
   }
   footer a { color: var(--white); text-underline-offset: 4px; }
+
+  /* ---------- pointer animation ---------- */
+  /* মাউসের পেছনে চলা বৃত্ত ও তার প্রতিধ্বনি।
+     পুরো স্তরটি difference মোডে, তাই যেকোনো রঙের উপর দেখা যায়;
+     ভেতরের বৃত্তগুলো নিজেদের মধ্যে স্বাভাবিকভাবে মেশে */
+  .cursor-layer {
+    position: fixed; inset: 0; z-index: 20; pointer-events: none;
+    mix-blend-mode: difference; opacity: 0; transition: opacity .25s ease;
+  }
+  .cursor-layer.on { opacity: 1; }
+  .cursor {
+    position: absolute; left: 0; top: 0;
+    width: 30px; height: 30px; margin: -15px 0 0 -15px;
+    border: 2px solid #fff; border-radius: 50%;
+    will-change: transform;
+  }
+  .cursor.lead { transition: box-shadow .2s ease, background-color .2s ease; }
+  /* লিংক বা বোতামের উপর: মূল বৃত্ত বাইরের দিকে ফুলে ওঠে */
+  .cursor.lead.big { background: rgba(255,255,255,.18); box-shadow: 0 0 0 17px rgba(255,255,255,.18); }
 
   /* ---------- small screens ---------- */
   @media (max-width: 900px) {
@@ -348,13 +368,7 @@
     <div class="wrap">
       <h2 data-i18n="work.title"></h2>
       <div class="grid">
-        <a class="case" href="https://hasanrony97.github.io/portfolio/" target="_blank" rel="noopener">
-          <div class="screen" id="screen">
-            <iframe src="https://hasanrony97.github.io/portfolio/" loading="lazy" tabindex="-1" aria-hidden="true" title="Career portfolio preview"></iframe>
-          </div>
-          <h3 data-i18n="work.case"></h3>
-          <p data-i18n="work.caseSub"></p>
-        </a>
+        <div class="cases" id="cases"></div>
         <ul class="facts">
           <li><b data-i18n="f1.t"></b><span data-i18n="f1.d"></span></li>
           <li><b data-i18n="f2.t"></b><span data-i18n="f2.d"></span></li>
@@ -424,6 +438,15 @@ const CONTACT = {
   fiverr: "https://www.fiverr.com/hasanrony97"
 };
 
+/* =====================================================================
+   আমার বানানো ওয়েবসাইট / WEBSITES I'VE BUILT
+   নতুন সাইট যোগ করতে এখানে একটি লাইন দিন, আর TEXT-এ তার শিরোনাম (t) ও বিবরণ (d)।
+   ===================================================================== */
+const WORKS = [
+  { id: "portfolio", url: "https://hasanrony97.github.io/portfolio/" },
+  { id: "freelance", url: "https://hasanrony97.github.io/freelance/" }
+];
+
 /* সেবার তালিকা: এখানে একটি যোগ করলে বাছাইয়ের বোতাম ও সেবার অংশ দুটোতেই চলে আসবে */
 const ICONS = {
   web: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M9 21h6M12 18v3M8.5 12.5 7 14l1.5 1.5M15.5 12.5 17 14l-1.5 1.5"/></svg>`,
@@ -489,9 +512,13 @@ const TEXT = {
                     bn: ["ওয়ার্ড ফরম্যাটিং", "এক্সেল শিট ও ডেটা এন্ট্রি", "পাওয়ারপয়েন্ট প্রেজেন্টেশন", "পিডিএফ রূপান্তর"] },
 
   "work.title":   { en: "Work you can check", bn: "যে কাজ নিজে দেখে নিতে পারেন" },
-  "work.case":    { en: "Career portfolio website", bn: "ক্যারিয়ার পোর্টফোলিও ওয়েবসাইট" },
-  "work.caseSub": { en: "Bilingual, dark mode, interactive timeline, published on GitHub Pages. Open it live.",
-                    bn: "দুই ভাষা, ডার্ক মোড, ইন্টার‍্যাক্টিভ টাইমলাইন, GitHub Pages-এ প্রকাশিত। সরাসরি খুলে দেখুন।" },
+  "w.portfolio.t": { en: "Career portfolio website", bn: "ক্যারিয়ার পোর্টফোলিও ওয়েবসাইট" },
+  "w.portfolio.d": { en: "Bilingual, dark mode, interactive timeline and skill finder, published on GitHub Pages.",
+                     bn: "দুই ভাষা, ডার্ক মোড, ইন্টার‍্যাক্টিভ টাইমলাইন ও দক্ষতার ব্যাখ্যা, GitHub Pages-এ প্রকাশিত।" },
+  "w.freelance.t": { en: "Freelance services website (this page)", bn: "ফ্রিল্যান্স সেবার ওয়েবসাইট (এই পাতা)" },
+  "w.freelance.d": { en: "Service picker with ready-written WhatsApp messages, live previews and two languages.",
+                     bn: "সেবা বাছাই করলেই লেখা-প্রস্তুত WhatsApp বার্তা, সরাসরি প্রিভিউ আর দুই ভাষা।" },
+  "w.open":        { en: "Open the live site", bn: "সরাসরি খুলে দেখুন" },
   "f1.t":         { en: "LL.M in International Law", bn: "এলএল.এম, আন্তর্জাতিক আইন" },
   "f1.d":         { en: "Rajshahi University, 2024. LL.B (Honours) in 2023.", bn: "রাজশাহী বিশ্ববিদ্যালয়, ২০২৪। এলএল.বি (সম্মান) ২০২৩।" },
   "f2.t":         { en: "Six months at Rajshahi Bar", bn: "রাজশাহী বারে ছয় মাস" },
@@ -566,6 +593,21 @@ function renderServices() {
   }).join("");
 }
 
+/* প্রিভিউয়ের ভেতরে আবার প্রিভিউ না বানাতে: পাতাটি নিজেই কোনো ফ্রেমের ভেতরে খোলা কি না */
+const inFrame = window.self !== window.top;
+
+function renderWorks() {
+  document.getElementById("cases").innerHTML = WORKS.map(work => `
+    <a class="case" href="${work.url}" target="_blank" rel="noopener">
+      <div class="screen">
+        ${inFrame ? "" : `<iframe src="${work.url}?preview" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe>`}
+      </div>
+      <h3>${t(`w.${work.id}.t`)}</h3>
+      <p>${t(`w.${work.id}.d`)} ${t("w.open")}</p>
+    </a>`).join("");
+  document.querySelectorAll("#cases .screen").forEach(box => { if (!inFrame) previewWatcher.observe(box); });
+}
+
 function setLanguage(next) {
   document.documentElement.lang = next;
   document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
@@ -576,6 +618,7 @@ function setLanguage(next) {
   document.getElementById("ch-whatsapp").href = whatsappLink("");
   renderPicker(false);
   renderServices();
+  renderWorks();
   try { localStorage.setItem("lang", next); } catch (e) {}
 }
 
@@ -599,11 +642,12 @@ document.getElementById("answer").addEventListener("click", event => {
 });
 
 /* কাজের নমুনা: আসল সাইটটি ছোট করে দেখানো */
-const screen = document.getElementById("screen");
-const fitPreview = () => {
-  screen.querySelector("iframe").style.transform = `scale(${screen.clientWidth / 1280})`;
-};
-new ResizeObserver(fitPreview).observe(screen);
+var previewWatcher = new ResizeObserver(entries => {
+  entries.forEach(entry => {
+    const box = entry.target;
+    box.querySelector("iframe").style.transform = `scale(${box.clientWidth / 1280})`;
+  });
+});
 
 /* থিম */
 document.getElementById("theme").addEventListener("click", () => {
@@ -622,6 +666,67 @@ for (const id of ["upwork", "fiverr"]) {
     link.href = CONTACT[id];
     link.hidden = false;
   }
+}
+
+/* মাউস পয়েন্টারের অ্যানিমেশন: শুধু মাউস আছে এমন ডিভাইসে, আর "কম নড়াচড়া" চাইলে বন্ধ */
+const hasMouse = matchMedia("(hover: hover) and (pointer: fine)").matches;
+const wantsMotion = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (hasMouse && wantsMotion) {
+  /* প্রতিধ্বনি = মূল বৃত্তের অনেকগুলো ঝাপসা কপি, যেগুলো গায়ে গায়ে লেগে থাকে।
+     কপি বেশি আর ফাঁক কম বলে আলাদা বৃত্ত নয়, একটি মিলিয়ে যাওয়া লেজ দেখা যায় */
+  const ECHOES = 18;        /* প্রতিধ্বনির সংখ্যা */
+  const STICKINESS = 0.72;  /* প্রতিটি কপি আগেরটির কতটা কাছে থাকে (০ থেকে ১) */
+
+  const layer = document.createElement("div");
+  layer.className = "cursor-layer";
+  layer.setAttribute("aria-hidden", "true");
+  document.body.appendChild(layer);
+
+  const rings = [];
+  for (let i = 0; i <= ECHOES; i++) {
+    const el = document.createElement("div");
+    el.className = i === 0 ? "cursor lead" : "cursor";
+    const fade = 1 - i / (ECHOES + 1);            /* ১ থেকে ধীরে ধীরে ০-র দিকে */
+    if (i > 0) {
+      el.style.opacity = (0.55 * fade * fade).toFixed(3);   /* লেজের দিকে দ্রুত ঝাপসা */
+      el.style.borderWidth = "1.5px";
+    }
+    layer.appendChild(el);
+    rings.push({ el, x: 0, y: 0, scale: 0.25 + 0.75 * fade });   /* লেজের দিকে ছোট */
+  }
+  const ring = rings[0].el;
+
+  let targetX = 0, targetY = 0, running = false;
+
+  /* মূল বৃত্ত মাউসের দিকে, আর প্রতিটি কপি তার আগের কপির দিকে প্রতি ফ্রেমে একটু করে এগোয়।
+     মাউস থামলে সবগুলো নিজে থেকেই মূল বৃত্তে এসে মিশে যায় */
+  const follow = () => {
+    let leadX = targetX, leadY = targetY, moved = 0;
+    rings.forEach((r, i) => {
+      const ease = i === 0 ? 0.22 : STICKINESS;
+      const stepX = (leadX - r.x) * ease, stepY = (leadY - r.y) * ease;
+      r.x += stepX;
+      r.y += stepY;
+      moved += Math.abs(stepX) + Math.abs(stepY);
+      r.el.style.transform = `translate3d(${r.x}px, ${r.y}px, 0) scale(${r.scale})`;
+      leadX = r.x; leadY = r.y;
+    });
+    if (moved > 0.05) requestAnimationFrame(follow);
+    else running = false;
+  };
+
+  window.addEventListener("pointermove", event => {
+    if (event.pointerType === "touch") return;
+    targetX = event.clientX;
+    targetY = event.clientY;
+    if (!layer.classList.contains("on")) {
+      rings.forEach(r => { r.x = targetX; r.y = targetY; });
+      layer.classList.add("on");
+    }
+    ring.classList.toggle("big", Boolean(event.target.closest("a, button")));
+    if (!running) { running = true; requestAnimationFrame(follow); }
+  }, { passive: true });
+  document.documentElement.addEventListener("pointerleave", () => layer.classList.remove("on"));
 }
 
 let saved = null;
